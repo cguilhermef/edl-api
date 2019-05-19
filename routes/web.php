@@ -20,3 +20,4 @@ $router->get('activate/{token}', [
     "uses" => "UserController@activate",
     "as" => "user.activate"
 ]);
+$router->post('login', "UserController@login");
