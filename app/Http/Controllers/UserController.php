@@ -11,7 +11,9 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\User;
 use App\Services\UserService;
+use App\Services\UserSessionService;
 use Illuminate\Http\Request;
+use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
 {
@@ -19,10 +21,12 @@ class UserController extends Controller
      * @var UserService
      */
     private $userService;
+    private $userSessionService;
 
-    public function __construct(UserService $userService)
+    public function __construct(UserService $userService, UserSessionService $userSessionService)
     {
         $this->userService = $userService;
+        $this->userSessionService = $userSessionService;
     }
 
     public function register(Request $request)
@@ -33,7 +37,7 @@ class UserController extends Controller
            'password' => 'required'
         ]);
 
-        $user = User::where('email', $request->input('email'));
+        $user = User::where('email', $request->input('email'))->first();
 
         if ($user) {
             return response('Email já cadastrado!', 400);
@@ -55,7 +59,22 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
+        $this->validate($request, [
+            'email' => 'required|email',
+            'password' => 'required'
+        ]);
+
         $user = User::where('email', $request->input('email'))->first();
-        dd($user->password);
+
+        if(!$user) {
+            return response('Usuário ou senha inválidos', 401);
+        }
+
+        $session = $this->userSessionService->start($user, $request);
+
+        return [
+            'access_token' => $session->access_token,
+            'valid_account' => false
+        ];
     }
 }
