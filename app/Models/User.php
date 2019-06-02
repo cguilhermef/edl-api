@@ -28,4 +28,12 @@ class User extends Base implements AuthenticatableContract, AuthorizableContract
     protected $hidden = [
         'password', 'valid_token'
     ];
+
+    public function userValidate() {
+       return $this->hasOne(UserValidate::class);
+    }
+
+    public function session() {
+        return $this->hasOne(UserSession::class);
+    }
 }

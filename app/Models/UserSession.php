@@ -18,4 +18,9 @@ class UserSession extends Model
     ];
 
     protected $table = 'user_sessions';
+
+    public function user()
+    {
+        $this->belongsTo(User::class);
+    }
 }

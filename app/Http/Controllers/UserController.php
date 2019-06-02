@@ -5,6 +5,7 @@
  * Date: 18/05/2019
  * Time: 17:33
  */
+
 namespace App\Http\Controllers;
 
 
@@ -13,6 +14,8 @@ use App\Models\User;
 use App\Services\UserService;
 use App\Services\UserSessionService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Ramsey\Uuid\Uuid;
 
 class UserController extends Controller
@@ -32,9 +35,9 @@ class UserController extends Controller
     public function register(Request $request)
     {
         $this->validate($request, [
-           'name' => 'required|string|max:255',
-           'email' => 'required|email',
-           'password' => 'required'
+            'name' => 'required|string|max:255',
+            'email' => 'required|email',
+            'password' => 'required'
         ]);
 
         $user = User::where('email', $request->input('email'))->first();
@@ -48,9 +51,15 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function activate(Request $request, string $token) {
+    public function validateEmail(Request $request) {
+        $user = $request->user();
+        $this->userService->sendUserEmailValidate($user);
+    }
 
-        if ($this->userService->activate($token) ){
+    public function activate(Request $request, string $token)
+    {
+
+        if ($this->userService->activate($token)) {
             return response(null, 204);
         }
 
@@ -59,14 +68,16 @@ class UserController extends Controller
 
     public function login(Request $request)
     {
+        /** valida se foram enviados usuário e senha corretamente */
         $this->validate($request, [
             'email' => 'required|email',
             'password' => 'required'
         ]);
 
+        /** Verifica se o usuário existe e se a senha está correta */
         $user = User::where('email', $request->input('email'))->first();
 
-        if(!$user) {
+        if (!$user || !Hash::check($request->input('password'), $user->password)) {
             return response('Usuário ou senha inválidos', 401);
         }
 
@@ -74,7 +85,22 @@ class UserController extends Controller
 
         return [
             'access_token' => $session->access_token,
-            'valid_account' => false
+            'email_verified' => (bool)$user->valid,
+            'account_verified' => (bool)$user->valid
         ];
+    }
+
+    public function registerAccount(Request $request)
+    {
+        return response('ok, register-account', 201);
+    }
+
+    public function confirmAccount(Request $request) {
+        return response('ok, confirm-account', 201);
+    }
+
+    public function teste(Request $request) {
+        $user = Auth::user();
+        return response('ok!', 200);
     }
 }
