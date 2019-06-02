@@ -20,6 +20,10 @@ $router->get('activate/{token}', [
 $router->post('login', "UserController@login");
 $router->post('register-account', "UserController@registerAccount");
 $router->post('confirm-account', "UserController@confirmAccount");
+$router->post('register-summoner', [
+    'middlware'=> [ 'auth', 'valid_email'],
+    'uses' => 'UserController@registerSummoner'
+]);
 $router->get('teste', [
     'middleware' => ['auth', 'valid_email'],
     'uses' => 'UserController@teste'

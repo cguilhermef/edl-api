@@ -11,12 +11,14 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use App\Services\RiotApiService;
 use App\Services\UserService;
 use App\Services\UserSessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Ramsey\Uuid\Uuid;
+use GuzzleHttp\Client;
 
 class UserController extends Controller
 {
@@ -24,10 +26,19 @@ class UserController extends Controller
      * @var UserService
      */
     private $userService;
+    /**
+     * @var UserSessionService
+     */
     private $userSessionService;
 
-    public function __construct(UserService $userService, UserSessionService $userSessionService)
+    private $riotApiService;
+
+    public function __construct(
+        UserService $userService,
+        UserSessionService $userSessionService,
+        RiotApiService $riotApiService)
     {
+        $this->riotApiService = $riotApiService;
         $this->userService = $userService;
         $this->userSessionService = $userSessionService;
     }
@@ -97,6 +108,13 @@ class UserController extends Controller
 
     public function confirmAccount(Request $request) {
         return response('ok, confirm-account', 201);
+    }
+
+    public function registerSummoner(Request $request)
+    {
+        $summonerName = $request->input('summoner_name');
+        $summoner = $this->riotApiService->summonerByName($summonerName);
+        return response(json_encode($summoner));
     }
 
     public function teste(Request $request) {

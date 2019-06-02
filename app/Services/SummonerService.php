@@ -11,5 +11,8 @@ namespace App\Services;
 
 class SummonerService
 {
+    public function summonerByName($name)
+    {
 
+    }
 }

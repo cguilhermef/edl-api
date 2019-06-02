@@ -17,7 +17,7 @@ class Summoner extends Model
         'revisionDate',
         'profileIconId'
     ];
-    
+
     protected $table = 'summoners';
 
     public function user()
