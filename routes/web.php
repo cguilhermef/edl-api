@@ -10,14 +10,17 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
-/** cadastro de usuário */
 $router->post('register', "UserController@register");
-/** ativação de usuário - validação de email */
 $router->get('activate/{token}', [
     "uses" => "UserController@activate",
     "as" => "user.activate"
 ]);
 $router->post('login', "UserController@login");
+$router->post('forgot-password', "UserController@forgot");
+$router->post('recovery', [
+    'uses' => 'UserController@recovery',
+    'as' => 'user.recovery'
+]);
 $router->post('register-account', "UserController@registerAccount");
 $router->post('confirm-account', "UserController@confirmAccount");
 $router->post('register-summoner', [

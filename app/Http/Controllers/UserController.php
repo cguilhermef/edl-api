@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Resources\UserResource;
+use App\Models\PasswordForgotten;
 use App\Models\User;
 use App\Services\RiotApiService;
 use App\Services\UserService;
@@ -17,8 +18,8 @@ use App\Services\UserSessionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Ramsey\Uuid\Uuid;
-use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class UserController extends Controller
 {
@@ -62,7 +63,8 @@ class UserController extends Controller
         return new UserResource($user);
     }
 
-    public function validateEmail(Request $request) {
+    public function validateEmail(Request $request)
+    {
         $user = $request->user();
         $this->userService->sendUserEmailValidate($user);
     }
@@ -101,12 +103,41 @@ class UserController extends Controller
         ];
     }
 
+    public function forgot(Request $request)
+    {
+        $this->validate($request, ['email' => 'required|email']);
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user) {
+            return response('Email não encontrado!', 400);
+        }
+        $this->userService->sendEmailPasswordForgotten($user);
+    }
+
+    public function recovery(Request $request)
+    {
+        $this->validate($request, [
+            'token' => 'required',
+            'password' => 'required'
+        ]);
+
+        $user = PasswordForgotten::where('token', $request->input('token'))->first()->user()->first();
+
+        if (!$user) {
+            return response('Token inválido', 400);
+        }
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+        return response('Senha atualizada com sucesso!', 204);
+    }
+
     public function registerAccount(Request $request)
     {
         return response('ok, register-account', 201);
     }
 
-    public function confirmAccount(Request $request) {
+    public function confirmAccount(Request $request)
+    {
         return response('ok, confirm-account', 201);
     }
 
@@ -117,7 +148,8 @@ class UserController extends Controller
         return response(json_encode($summoner));
     }
 
-    public function teste(Request $request) {
+    public function teste(Request $request)
+    {
         $user = Auth::user();
         return response('ok!', 200);
     }

@@ -9,7 +9,9 @@
 namespace App\Services;
 
 use App\Exceptions\ApplicationException;
+use App\Mail\PasswordForgottenMail;
 use App\Mail\UserEmailValidate;
+use App\Models\PasswordForgotten;
 use App\Models\User;
 use App\Models\UserValidate;
 use Carbon\Carbon;
@@ -46,6 +48,16 @@ class UserService
 
         if($userValidate) {
             Mail::send(new UserEmailValidate($user, $userValidate->token));
+        }
+    }
+
+    public function sendEmailPasswordForgotten($user) {
+        $passwordForgot = PasswordForgotten::create([
+            'user_id' => $user->id,
+            'token' => Str::random(36)
+        ]);
+        if ($passwordForgot) {
+            Mail::send(new PasswordForgottenMail($user, $passwordForgot->token));
         }
     }
 

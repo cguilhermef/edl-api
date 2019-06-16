@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class CreateSummoner extends Migration
+class CreatePasswordForgotten extends Migration
 {
     /**
      * Run the migrations.
@@ -13,16 +13,10 @@ class CreateSummoner extends Migration
      */
     public function up()
     {
-        Schema::create('summoners', function (Blueprint $table) {
+        Schema::create('passwords_forgotten', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            $table->integer('profileIconId');
-            $table->string('name');
-            $table->string('puuid');
-            $table->bigInteger('summonerLevel');
-            $table->bigInteger('revisionDate');
-            $table->string('accountId');
-            $table->string('summonerId');
+            $table->string('token');
             $table->bigInteger('user_id')->unsigned();
             $table->foreign('user_id')->references('id')->on('users');
         });
@@ -35,6 +29,6 @@ class CreateSummoner extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('summoner');
+        Schema::dropIfExists('password_forgotten');
     }
 }
