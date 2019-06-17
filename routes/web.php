@@ -21,7 +21,10 @@ $router->post('recovery', [
     'uses' => 'UserController@recovery',
     'as' => 'user.recovery'
 ]);
-$router->post('register-account', "UserController@registerAccount");
+$router->post('register-account', [
+    'uses' => 'UserController@registerAccount',
+    'middlware' => ['auth', 'valid_email']
+]);
 $router->post('confirm-account', "UserController@confirmAccount");
 $router->post('register-summoner', [
     'middlware'=> [ 'auth', 'valid_email'],

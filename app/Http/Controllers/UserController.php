@@ -11,10 +11,12 @@ namespace App\Http\Controllers;
 
 use App\Http\Resources\UserResource;
 use App\Models\PasswordForgotten;
+use App\Models\Summoner;
 use App\Models\User;
 use App\Services\RiotApiService;
 use App\Services\UserService;
 use App\Services\UserSessionService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -121,7 +123,13 @@ class UserController extends Controller
             'password' => 'required'
         ]);
 
-        $user = PasswordForgotten::where('token', $request->input('token'))->first()->user()->first();
+        $passwordForgotten = PasswordForgotten::where('token', $request->input('token'))
+            ->where('created_at', '>=', (new Carbon('now'))->subMinute(10))
+            ->first();
+        if (!$passwordForgotten) {
+            return response('Token inválido', 400);
+        }
+        $user = $passwordForgotten->user()->first();
 
         if (!$user) {
             return response('Token inválido', 400);
@@ -133,7 +141,21 @@ class UserController extends Controller
 
     public function registerAccount(Request $request)
     {
-        return response('ok, register-account', 201);
+        $this->validate($request, [
+            'summoner' => 'required'
+        ]);
+
+        $summoner = $this->riotApiService->summonerByName($request->input('summoner'));
+        if (!$summoner) {
+            return response('Invocador não encontrado!', 400);
+        }
+        $icons = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 26, 28];
+        $filteredIcons = array_filter($icons, function($icon) use ($summoner) {
+           return $icon !== $summoner->profileIconId;
+        });
+        return response([
+            'iconId' => $filteredIcons[array_rand($filteredIcons)]
+        ], 200);
     }
 
     public function confirmAccount(Request $request)
