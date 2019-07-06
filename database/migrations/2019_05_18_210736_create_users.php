@@ -21,6 +21,7 @@ class CreateUsers extends Migration
             $table->string('password');
             $table->boolean('active')->default(true);
             $table->boolean('valid')->default(false);
+            $table->boolean('confirmed')->default(false);
             $table->softDeletes();
         });
     }

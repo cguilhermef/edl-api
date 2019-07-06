@@ -10,6 +10,7 @@ namespace App\Http\Controllers;
 
 
 use App\Http\Resources\UserResource;
+use App\Models\AccountConfirmation;
 use App\Models\PasswordForgotten;
 use App\Models\Summoner;
 use App\Models\User;
@@ -101,7 +102,7 @@ class UserController extends Controller
         return [
             'access_token' => $session->access_token,
             'email_verified' => (bool)$user->valid,
-            'account_verified' => (bool)$user->valid
+            'account_verified' => (bool)$user->confirmed
         ];
     }
 
@@ -145,6 +146,8 @@ class UserController extends Controller
             'summoner' => 'required'
         ]);
 
+        $user = $request->user();
+
         $summoner = $this->riotApiService->summonerByName($request->input('summoner'));
         if (!$summoner) {
             return response('Invocador não encontrado!', 400);
@@ -153,14 +156,55 @@ class UserController extends Controller
         $filteredIcons = array_filter($icons, function($icon) use ($summoner) {
            return $icon !== $summoner->profileIconId;
         });
+
+        $iconId = $filteredIcons[array_rand($filteredIcons)];
+
+        $confirmation = AccountConfirmation::create([
+            'user_id' => $user->id,
+            'icon_id' => $iconId
+        ]);
+
+        if (!$confirmation) {
+            return response('Erro ao criar confirmação', 400);
+        }
+
         return response([
-            'iconId' => $filteredIcons[array_rand($filteredIcons)]
+            'iconId' => $iconId
         ], 200);
     }
 
     public function confirmAccount(Request $request)
     {
-        return response('ok, confirm-account', 201);
+        $this->validate($request, [
+           'summoner' => 'required',
+           'iconId' => 'required'
+        ]);
+
+        $user = $request->user();
+
+        $summoner = $this->riotApiService->summonerByName($request->input('summoner'));
+        if (!$summoner) {
+            return response('Invocador não encontrado!', 400);
+        }
+
+        $accountConfirmation = AccountConfirmation::where('user_id', $user->id)
+            ->where('created_at', '>=', (new Carbon('now'))->subMinute(10))
+            ->where('icon_id', $request->input('iconId'))
+            ->first();
+
+        if (!$accountConfirmation) {
+            return response('Erro ao confirmar conta', 400);
+        }
+
+
+        if ($accountConfirmation->icon_id !== $summoner->profileIconId) {
+            return response('Erro ao confirmar conta. Icone incorreto, tente novamente', 400);
+        }
+
+        User::where('id', $user->id)->update(['confirmed' => true]);
+        AccountConfirmation::where('user_id', $user->id)->delete();
+
+        return response('Conta confirmada com sucesso!', 200);
     }
 
     public function registerSummoner(Request $request)
