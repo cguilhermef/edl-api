@@ -99,7 +99,7 @@ class UserController extends Controller
 
         $session = $this->userSessionService->start($user, $request);
 
-        $summoner = Summoner::where('user_id', $user->id);
+        $summoner = Summoner::where('user_id', $user->id)->first();
 
         return [
             'access_token' => $session->access_token,
@@ -108,8 +108,8 @@ class UserController extends Controller
             'user' => [
                 'name' => $user->name,
                 'email' => $user->email,
-                'profile_icon_id' =>  null,
-                'summoner_name' => null
+                'profile_icon_id' =>  $summoner ? $summoner->profileIconId : null,
+                'summoner_name' => $summoner ? $summoner->name : null
             ]
         ];
     }
