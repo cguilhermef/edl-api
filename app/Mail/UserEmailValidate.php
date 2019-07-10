@@ -28,7 +28,7 @@ class UserEmailValidate extends Mailable
     {
         return $this->view('mail.user-validate-email', [
             'user' => $this->user,
-            'url_activate' => route('user.activate', [ 'token' => $this->token])
+            'url_activate' => env('CLIENT_URL') . "/account/activate?token=$this->token"
         ]);
     }
 }

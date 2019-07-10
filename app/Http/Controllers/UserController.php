@@ -99,10 +99,18 @@ class UserController extends Controller
 
         $session = $this->userSessionService->start($user, $request);
 
+        $summoner = Summoner::where('user_id', $user->id);
+
         return [
             'access_token' => $session->access_token,
             'email_verified' => (bool)$user->valid,
-            'account_verified' => (bool)$user->confirmed
+            'account_verified' => (bool)$user->confirmed,
+            'user' => [
+                'name' => $user->name,
+                'email' => $user->email,
+                'profile_icon_id' =>  null,
+                'summoner_name' => null
+            ]
         ];
     }
 
