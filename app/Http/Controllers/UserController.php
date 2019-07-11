@@ -12,8 +12,10 @@ namespace App\Http\Controllers;
 use App\Http\Resources\UserResource;
 use App\Models\AccountConfirmation;
 use App\Models\PasswordForgotten;
+use App\Models\Ranking;
 use App\Models\Summoner;
 use App\Models\User;
+use App\Models\UserRankings;
 use App\Services\RiotApiService;
 use App\Services\UserService;
 use App\Services\UserSessionService;
@@ -111,6 +113,20 @@ class UserController extends Controller
                     'profileIconId' => $summoner->profileIconId
                 ]);
             $summoner = Summoner::where('userId', $user->id)->first();
+
+            $rankings = $this->riotApiService->rankingsOf($summoner->summonerId);
+
+            foreach ($rankings as $ranking) {
+                $rr = Ranking::where('rank', $ranking['rank'])
+                    ->where('tier', $ranking['tier'])
+                    ->first();
+
+                $r = new UserRankings;
+                $r->fill($ranking);
+                $r->userId = $user->id;
+                $r->rankingId = $rr->id;
+                $r->save();
+            }
         }
 
         return [
@@ -241,5 +257,13 @@ class UserController extends Controller
         $summonerName = $request->input('summoner_name');
         $summoner = $this->riotApiService->summonerByName($summonerName);
         return response(json_encode($summoner));
+    }
+
+    public function teste(Request $request)
+    {
+        $summoner = $this->riotApiService->summonerByName('T97 Cruciatus');
+        $entries = $this->riotApiService->rankingsOf($summoner->id);
+
+        return response($entries);
     }
 }

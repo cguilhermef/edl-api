@@ -36,4 +36,8 @@ class User extends Base implements AuthenticatableContract, AuthorizableContract
     public function session() {
         return $this->hasOne(UserSession::class);
     }
+
+    public function rankings() {
+        return $this->hasMany(Ranking::class);
+    }
 }

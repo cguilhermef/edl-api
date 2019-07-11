@@ -31,6 +31,5 @@ $router->post('register-summoner', [
     'uses' => 'UserController@registerSummoner'
 ]);
 $router->get('teste', [
-    'middleware' => ['auth', 'valid_email'],
     'uses' => 'UserController@teste'
 ]);
