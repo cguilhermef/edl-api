@@ -115,19 +115,26 @@ class UserController extends Controller
             $summoner = Summoner::where('userId', $user->id)->first();
 
             $rankings = $this->riotApiService->rankingsOf($summoner->summonerId);
+            UserRankings::where('userId', $user->id)->delete();
 
             foreach ($rankings as $ranking) {
-                $rr = Ranking::where('rank', $ranking['rank'])
+                $riotRankings = Ranking::where('rank', $ranking['rank'])
                     ->where('tier', $ranking['tier'])
                     ->first();
 
-                $r = new UserRankings;
-                $r->fill($ranking);
-                $r->userId = $user->id;
-                $r->rankingId = $rr->id;
-                $r->save();
+                $userRankings = new UserRankings;
+                $userRankings->fill($ranking);
+                $userRankings->userId = $user->id;
+                $userRankings->rankingId = $riotRankings->id;
+                $userRankings->save();
             }
         }
+
+        $userRankings = UserRankings::where('userId', $user->id)
+            ->join('rankings', 'user_rankings.rankingId', '=', 'rankings.id')
+            ->select('rankings.*', 'user_rankings.*')
+            ->get();
+
 
         return [
             'access_token' => $session->access_token,
@@ -137,7 +144,8 @@ class UserController extends Controller
                 'name' => $user->name,
                 'email' => $user->email
             ],
-            'summoner' => $summoner ? $summoner : null
+            'summoner' => $summoner ? $summoner : null,
+            'ranking' => $userRankings ? $userRankings : null
         ];
     }
 
