@@ -28,7 +28,7 @@ class PasswordForgottenMail extends Mailable
     {
         return $this->view('mail.password-forgotten-email', [
             'user' => $this->user,
-            'url_activate' => route('user.recovery', [ 'token' => $this->token])
+            'url_activate' => env('CLIENT_URL') . "/account/recovery-password?token=$this->token"
         ]);
     }
 }
