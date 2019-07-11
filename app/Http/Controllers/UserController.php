@@ -99,7 +99,19 @@ class UserController extends Controller
 
         $session = $this->userSessionService->start($user, $request);
 
-        $summoner = Summoner::where('user_id', $user->id)->first();
+        $summoner = Summoner::where('userId', $user->id)->first();
+
+        if ($summoner) {
+            $summoner = $this->riotApiService->summonerByAccountId($summoner->accountId);
+            Summoner::where('summonerId', $summoner->id)
+                ->update([
+                    'name' => $summoner->name,
+                    'summonerLevel' => $summoner->summonerLevel,
+                    'revisionDate' => $summoner->revisionDate,
+                    'profileIconId' => $summoner->profileIconId
+                ]);
+            $summoner = Summoner::where('userId', $user->id)->first();
+        }
 
         return [
             'access_token' => $session->access_token,
@@ -107,10 +119,9 @@ class UserController extends Controller
             'account_verified' => (bool)$user->confirmed,
             'user' => [
                 'name' => $user->name,
-                'email' => $user->email,
-                'profile_icon_id' =>  $summoner ? $summoner->profileIconId : null,
-                'summoner_name' => $summoner ? $summoner->name : null
-            ]
+                'email' => $user->email
+            ],
+            'summoner' => $summoner ? $summoner : null
         ];
     }
 
@@ -161,8 +172,8 @@ class UserController extends Controller
             return response('Invocador não encontrado!', 400);
         }
         $icons = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 27, 26, 28];
-        $filteredIcons = array_filter($icons, function($icon) use ($summoner) {
-           return $icon !== $summoner->profileIconId;
+        $filteredIcons = array_filter($icons, function ($icon) use ($summoner) {
+            return $icon !== $summoner->profileIconId;
         });
 
         $iconId = $filteredIcons[array_rand($filteredIcons)];
@@ -184,8 +195,8 @@ class UserController extends Controller
     public function confirmAccount(Request $request)
     {
         $this->validate($request, [
-           'summoner' => 'required',
-           'iconId' => 'required'
+            'summoner' => 'required',
+            'iconId' => 'required'
         ]);
 
         $user = $request->user();
@@ -210,9 +221,19 @@ class UserController extends Controller
         }
 
         User::where('id', $user->id)->update(['confirmed' => true]);
+        $summoner = Summoner::create([
+            'summonerId' => $summoner->id,
+            'accountId' => $summoner->accountId,
+            'puuid' => $summoner->puuid,
+            'userId' => $user->id,
+            'name' => $summoner->name,
+            'summonerLevel' => $summoner->summonerLevel,
+            'revisionDate' => $summoner->revisionDate,
+            'profileIconId' => $summoner->profileIconId
+        ]);
         AccountConfirmation::where('user_id', $user->id)->delete();
 
-        return response('Conta confirmada com sucesso!', 200);
+        return response(json_encode($summoner), 200);
     }
 
     public function registerSummoner(Request $request)
@@ -220,11 +241,5 @@ class UserController extends Controller
         $summonerName = $request->input('summoner_name');
         $summoner = $this->riotApiService->summonerByName($summonerName);
         return response(json_encode($summoner));
-    }
-
-    public function teste(Request $request)
-    {
-        $user = Auth::user();
-        return response('ok!', 200);
     }
 }

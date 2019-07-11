@@ -29,4 +29,13 @@ class RiotApiService
 
         return json_decode($res->getBody());
     }
+
+    public function summonerByAccountId($accountId)
+    {
+        $res = $this->client->request('GET',"summoners/by-account/$accountId", [
+            'query' => ['api_key' => $this->apiKey]
+        ]);
+
+        return json_decode($res->getBody());
+    }
 }

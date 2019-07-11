@@ -11,7 +11,7 @@ class Summoner extends Model
         'summonerId',
         'accountId',
         'puuid',
-        'user_id',
+        'userId',
         'name',
         'summonerLevel',
         'revisionDate',
