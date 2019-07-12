@@ -1,5 +1,4 @@
 <?php
-
 /*
 |--------------------------------------------------------------------------
 | Application Routes
@@ -33,3 +32,20 @@ $router->post('register-summoner', [
 $router->get('teste', [
     'uses' => 'UserController@teste'
 ]);
+
+/** Teams */
+
+$router->post('teams/', [
+    'uses' => 'TeamController@create',
+    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+]);
+$router->delete('teams/{teamId}', [
+    'uses' => 'TeamController@destroy',
+    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+]);
+
+$router->get('teams[/{page},/{size}]', 'TeamController@index');
+
+
+/** outros */
+$router->get('rankings', 'RankingsController@index');

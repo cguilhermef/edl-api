@@ -65,7 +65,8 @@ $app->middleware([
 
 $app->routeMiddleware([
     'auth' => App\Http\Middleware\Authenticate::class,
-    'valid_email' => App\Http\Middleware\ValidateEmail::class
+    'valid_email' => App\Http\Middleware\ValidateEmail::class,
+    'confirmed_account' => App\Http\Middleware\ValidateAccount::class
 ]);
 
 /*
