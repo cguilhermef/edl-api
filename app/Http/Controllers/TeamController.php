@@ -68,7 +68,9 @@ class TeamController extends Controller
 
     public function show(Request $request, $teamId)
     {
-        $team = Team::where('id', $teamId)->first();
+        $team = Team::where('id', $teamId)
+            ->with(['vacancies', 'initialRanking'])
+            ->first();
         if (!$team) {
             return response('Equipe não encontrada!', 404);
         }

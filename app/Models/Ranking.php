@@ -18,4 +18,7 @@ class Ranking extends Base
 
     protected $hidden = [ 'created_at', 'updated_at', 'active'];
 
+    public function teams() {
+        return $this->hasMany(Team::class, 'minRanking', 'id');
+    }
 }

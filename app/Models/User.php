@@ -40,4 +40,12 @@ class User extends Base implements AuthenticatableContract, AuthorizableContract
     public function rankings() {
         return $this->hasMany(Ranking::class);
     }
+
+    public function teams() {
+        return $this->hasMany(Team::class, 'owner', 'id');
+    }
+
+    public function summoner() {
+        return $this->hasOne(Summoner::class, 'userId', 'id');
+    }
 }

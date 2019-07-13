@@ -21,7 +21,15 @@ class Team extends Base
         return $this->belongsTo(User::class, 'owner', 'id');
     }
 
+    public function owner() {
+        return $this->belongsTo(User::class, 'owner', 'id');
+    }
+
     public function initialRanking() {
         return $this->belongsTo(Ranking::class, 'minRanking', 'id');
+    }
+
+    public function vacancies() {
+        return $this->hasMany(Vacancies::class, 'teamId');
     }
 }

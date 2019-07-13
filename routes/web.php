@@ -25,34 +25,43 @@ $router->post('recovery', [
 ]);
 $router->post('register-account', [
     'uses' => 'UserController@registerAccount',
-    'middlware' => ['auth', 'valid_email']
+    'middleware' => ['auth', 'valid_email']
 ]);
 $router->post('confirm-account', "UserController@confirmAccount");
 $router->post('register-summoner', [
-    'middlware'=> [ 'auth', 'valid_email'],
+    'middleware' => ['auth', 'valid_email'],
     'uses' => 'UserController@registerSummoner'
 ]);
-$router->get('teste', [
-    'uses' => 'UserController@teste'
-]);
-
 /** Teams */
 
 $router->post('teams/', [
     'uses' => 'TeamController@create',
-    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+    'middleware' => ['auth', 'valid_email', 'confirmed_account']
 ]);
 $router->put('teams/{teamId}', [
     'uses' => 'TeamController@update',
-    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+    'middleware' => ['auth', 'valid_email', 'confirmed_account']
 ]);
 $router->delete('teams/{teamId}', [
     'uses' => 'TeamController@destroy',
-    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+    'middleware' => ['auth', 'valid_email', 'confirmed_account']
 ]);
 
 $router->get('teams[/{page},/{size}]', 'TeamController@index');
 $router->get('teams/{teamId}', 'TeamController@show');
+
+/** Vacancies */
+$router->get('vacancies[/{page},/{size}]', 'VacancyController@index');
+
+$router->post('vacancies/', [
+    'uses' => 'VacancyController@store',
+    'middleware' => ['auth', 'valid_email', 'confirmed_account']
+]);
+
+$router->delete('vacancies/{vacancyId}', [
+    'uses' => 'VacancyController@destroy',
+    'middleware' => ['auth', 'valid_email', 'confirmed_account']
+]);
 
 /** outros */
 $router->get('rankings', 'RankingsController@index');
