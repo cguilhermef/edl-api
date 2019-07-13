@@ -10,7 +10,8 @@
         "illuminate/mail": "^5.8",
         "laravel/lumen-framework": "5.8.*",
         "ramsey/uuid": "^3.8",
-        "vlucas/phpdotenv": "^3.3"
+        "vlucas/phpdotenv": "^3.3",
+        "sendgrid/sendgrid": "~5.0.9"
     },
     "require-dev": {
         "fzaninotto/faker": "^1.4",
@@ -42,5 +43,5 @@
         "optimize-autoloader": true
     },
     "minimum-stability": "dev",
-    "prefer-stable": true
+    "prefer-stable": true,
 }
