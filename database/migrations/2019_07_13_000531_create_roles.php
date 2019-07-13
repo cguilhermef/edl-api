@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class UserRankings extends Migration
+class CreateRoles extends Migration
 {
     /**
      * Run the migrations.
@@ -13,14 +13,10 @@ class UserRankings extends Migration
      */
     public function up()
     {
-        Schema::create('user_rankings', function (Blueprint $table) {
+        Schema::create('roles', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->timestamps();
-            $table->bigInteger('userId')->unsigned();
-            $table->foreign('userId')->references('id')->on('users');
-            $table->bigInteger('rankingId')->unsigned();
-            $table->foreign('rankingId')->references('id')->on('rankings');
-            $table->string('queueType');
+            $table->string('name');
         });
     }
 
@@ -31,6 +27,6 @@ class UserRankings extends Migration
      */
     public function down()
     {
-        //
+        Schema::dropIfExists('roles');
     }
 }

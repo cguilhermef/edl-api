@@ -9,6 +9,9 @@
 | and give it the Closure to call when that URI is requested.
 |
 */
+
+use \App\Models\Roles;
+
 $router->post('register', "UserController@register");
 $router->get('activate/{token}', [
     "uses" => "UserController@activate",
@@ -39,13 +42,20 @@ $router->post('teams/', [
     'uses' => 'TeamController@create',
     'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
 ]);
+$router->put('teams/{teamId}', [
+    'uses' => 'TeamController@update',
+    'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
+]);
 $router->delete('teams/{teamId}', [
     'uses' => 'TeamController@destroy',
     'middlware' => [ 'auth', 'valid_email', 'confirmed_account']
 ]);
 
 $router->get('teams[/{page},/{size}]', 'TeamController@index');
-
+$router->get('teams/{teamId}', 'TeamController@show');
 
 /** outros */
 $router->get('rankings', 'RankingsController@index');
+$router->get('roles', function () {
+    return Roles::orderBy('name')->get();
+});

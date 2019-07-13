@@ -102,7 +102,6 @@ class UserController extends Controller
         $session = $this->userSessionService->start($user, $request);
 
         $summoner = Summoner::where('userId', $user->id)->first();
-
         if ($summoner) {
             $summoner = $this->riotApiService->summonerByAccountId($summoner->accountId);
             Summoner::where('summonerId', $summoner->id)
@@ -114,19 +113,18 @@ class UserController extends Controller
                 ]);
             $summoner = Summoner::where('userId', $user->id)->first();
 
-            $rankings = $this->riotApiService->rankingsOf($summoner->summonerId);
+            $userRankingsFromRiot = $this->riotApiService->rankingsOf($summoner->summonerId);
             UserRankings::where('userId', $user->id)->delete();
-
-            foreach ($rankings as $ranking) {
-                $riotRankings = Ranking::where('rank', $ranking['rank'])
-                    ->where('tier', $ranking['tier'])
+            foreach ($userRankingsFromRiot as $urr) {
+                $ranking = Ranking::where('rank', $urr['rank'])
+                    ->where('tier', $urr['tier'])
                     ->first();
 
-                $userRankings = new UserRankings;
-                $userRankings->fill($ranking);
-                $userRankings->userId = $user->id;
-                $userRankings->rankingId = $riotRankings->id;
-                $userRankings->save();
+                $userRanking = new UserRankings;
+                $userRanking->userId = $user->id;
+                $userRanking->rankingId = $ranking->id;
+                $userRanking->queueType = $urr['queueType'];
+                $userRanking->save();
             }
         }
 
@@ -141,6 +139,7 @@ class UserController extends Controller
             'email_verified' => (bool)$user->valid,
             'account_verified' => (bool)$user->confirmed,
             'user' => [
+                'id' => $user->id,
                 'name' => $user->name,
                 'email' => $user->email
             ],
